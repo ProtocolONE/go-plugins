@@ -72,14 +72,14 @@ func (r *rabbitMQChannel) DeclareExchange(exchange string) error {
 	)
 }
 
-func (r *rabbitMQChannel) DeclareQueue(queue string) error {
+func (r *rabbitMQChannel) DeclareQueue(queue string, args amqp.Table) error {
 	_, err := r.channel.QueueDeclare(
 		queue, // name
 		false, // durable
 		true,  // autoDelete
 		false, // exclusive
 		false, // noWait
-		nil,   // args
+		args,   // args
 	)
 	return err
 }

@@ -241,6 +241,10 @@ func (r *rbroker) Init(opts ...broker.Option) error {
 	return nil
 }
 
+func (r *rbroker) DeclareTtlQueue(returnExchange string, ttl int32) error {
+	return r.conn.DeclareTtlQueue(returnExchange, ttl)
+}
+
 func (r *rbroker) Connect() error {
 	if r.conn == nil {
 		r.conn = newRabbitMQConn(r.getExchange(), r.opts.Addrs, r.getPrefetchCount(), r.getPrefetchGlobal())

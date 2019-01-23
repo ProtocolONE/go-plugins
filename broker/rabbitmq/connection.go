@@ -200,7 +200,7 @@ func (r *rabbitMQConn) Consume(queue, key string, headers amqp.Table, autoAck, d
 	if durableQueue {
 		err = consumerChannel.DeclareDurableQueue(queue)
 	} else {
-		err = consumerChannel.DeclareQueue(queue)
+		err = consumerChannel.DeclareQueue(queue, nil)
 	}
 
 	if err != nil {
@@ -222,4 +222,25 @@ func (r *rabbitMQConn) Consume(queue, key string, headers amqp.Table, autoAck, d
 
 func (r *rabbitMQConn) Publish(exchange, key string, msg amqp.Publishing) error {
 	return r.ExchangeChannel.Publish(exchange, key, msg)
+}
+
+func (r *rabbitMQConn) DeclareTtlQueue(returnExchange string, ttl int32) error {
+	consumerChannel, err := newRabbitChannel(r.Connection, r.prefetchCount, r.prefetchGlobal)
+	if err != nil {
+		return err
+	}
+
+	err = consumerChannel.DeclareQueue(
+		r.exchange,
+		amqp.Table{
+			"x-dead-letter-exchange": returnExchange,
+			"x-message-ttl":          ttl * 1000,
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return consumerChannel.BindQueue(r.exchange, "*", r.exchange, nil)
 }
